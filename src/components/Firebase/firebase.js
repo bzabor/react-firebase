@@ -21,16 +21,8 @@ class Firebase {
 
   doLogIn = () => {
     console.log("ENTER firebase.js doLogIn()");
-    const provider = new this.auth.GoogleAuthProvider();
-    this.auth.signInWithPopup(provider);
-    // .then(auth => {
-    //   console.log("SIGN IN SUCCESS!");
-    //   return true;
-    // })
-    // .catch(error => {
-    //   console.error(error);
-    //   return false;
-    // });
+    const provider = new app.auth.GoogleAuthProvider();
+    return this.auth.signInWithPopup(provider);
   };
 }
 
