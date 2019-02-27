@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import LogOutButton from '../LogOut';
+import LogOutLink from '../LogOut';
+import LogInLink from '../LogIn';
 import * as ROUTES from '../../constants/routes';
 
 const Navigation = ({ authUser }) => (
@@ -20,7 +21,7 @@ const NavigationAuth = () => (
       <Link to={ROUTES.ACCOUNT}>Account</Link>
     </li>
     <li>
-      <LogOutButton />
+      <LogOutLink />
     </li>
   </ul>
 );
@@ -31,7 +32,7 @@ const NavigationNonAuth = () => (
       <Link to={ROUTES.LANDING}>Landing</Link>
     </li>
     <li>
-      <Link to={ROUTES.LOG_IN}>Log In</Link>
+      <LogInLink />
     </li>
   </ul>
 );
