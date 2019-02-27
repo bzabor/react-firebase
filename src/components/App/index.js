@@ -1,20 +1,17 @@
 import React, { Component } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
-
+import { withFirebase } from '../Firebase';
 import Navigation from "../Navigation";
 import LandingPage from "../Landing";
-import LogInPage from "../LogIn";
 import HomePage from "../Home";
 import AccountPage from "../Account";
 import AdminPage from "../Admin";
 
 import * as ROUTES from "../../constants/routes";
-import { withFirebase } from '../Firebase';
 
 class App extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       authUser: null,
     };
@@ -34,6 +31,16 @@ class App extends Component {
   }
 
   render() {
+       let authRoutes = <Route path={ROUTES.LANDING} component={LandingPage} />;
+       if (this.state.authUser) {
+            authRoutes =
+                <div>
+                    <Route exact path={ROUTES.HOME} component={HomePage}  />
+                    <Route exact path={ROUTES.ACCOUNT} component={AccountPage}  />
+                    <Route exact path={ROUTES.ADMIN} component={AdminPage}  />
+                </div>;
+       }
+
     return (
       <Router>
         <div>
@@ -41,15 +48,12 @@ class App extends Component {
 
           <hr/>
 
-          <Route exact path={ROUTES.LANDING} component={LandingPage} />
-          <Route path={ROUTES.LOG_IN} component={LogInPage} />
-          <Route path={ROUTES.HOME} component={HomePage} />
-          <Route path={ROUTES.ACCOUNT} component={AccountPage} />
-          <Route path={ROUTES.ADMIN} component={AdminPage} />
+          {authRoutes}
 
         </div>
       </Router>
     );
   }
 }
+
 export default withFirebase(App);

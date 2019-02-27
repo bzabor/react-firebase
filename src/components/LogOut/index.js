@@ -1,11 +1,25 @@
-import React from 'react';
-
+import React, { Component } from "react";
+import Typography from '@material-ui/core/Typography';
 import { withFirebase } from '../Firebase';
 
-const LogOutButton = ({ firebase }) => (
-  <button type="button" onClick={firebase.doLogOut}>
-    Log Out
-  </button>
-);
+class LogOutLink extends Component {
 
-export default withFirebase(LogOutButton);
+  logOut = event => {
+    event.preventDefault();
+    this.props.firebase.doLogOut()
+      .then(authUser => {
+        console.log(authUser);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  };
+
+  render() {
+    return (
+        <Typography variant="body1" onClick={this.logOut}>LOG OUT</Typography>
+    )
+  }
+}
+
+export default withFirebase(LogOutLink);
