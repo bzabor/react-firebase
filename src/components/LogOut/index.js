@@ -1,12 +1,13 @@
 import React, { Component } from "react";
-import Typography from '@material-ui/core/Typography';
-import { withFirebase } from '../Firebase';
+import Button from "@material-ui/core/Button";
+
+import { withFirebase } from "../Firebase";
 
 class LogOutLink extends Component {
-
   logOut = event => {
     event.preventDefault();
-    this.props.firebase.doLogOut()
+    this.props.firebase
+      .doLogOut()
       .then(authUser => {
         console.log(authUser);
       })
@@ -17,8 +18,10 @@ class LogOutLink extends Component {
 
   render() {
     return (
-        <Typography variant="body1" onClick={this.logOut}>LOG OUT</Typography>
-    )
+      <Button color="inherit" onClick={this.logOut}>
+        Log Out
+      </Button>
+    );
   }
 }
 
