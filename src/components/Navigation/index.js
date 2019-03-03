@@ -10,8 +10,8 @@ import LogOutLink from "../LogOut";
 import LogInLink from "../LogIn";
 import * as ROUTES from "../../constants/routes";
 
-const Navigation = ({ authUser, isAdmin }) => {
-  return authUser ? (
+const Navigation = ({ employee, isAdmin }) => {
+  return employee ? (
     <div>
       <NavbarAuth isAdmin={isAdmin} />
     </div>

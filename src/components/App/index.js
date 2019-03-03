@@ -9,6 +9,7 @@ import LandingPage from "../Landing";
 import HomePage from "../Home";
 import AddExpensePage from "../AddExpense";
 import AdminPage from "../Admin";
+import API from "../API";
 
 import * as ROUTES from "../../constants/routes";
 
@@ -29,30 +30,94 @@ const theme = createMuiTheme({
 class App extends Component {
   constructor(props) {
     super(props);
+
+    this.idToken = "";
+
     this.state = {
-      authUser: null,
-      isAdmin: false,
-      loadComplete: false
+      idToken: "",
+      employee: localStorage.getItem("employee"),
+      loadComplete: false,
+      error: ""
     };
   }
 
+  onSetResult = (key, result) => {
+    localStorage.setItem(key, JSON.stringify(result));
+    this.setState({ key: result });
+  };
+
   componentDidMount() {
+    console.log("ENTER APP componentDidMount()");
     this.listener = this.props.firebase.auth.onAuthStateChanged(authUser => {
+      console.log("authuser is");
+      console.log(authUser);
       if (authUser) {
         this.setState({ loadComplete: false });
-
         this.props.firebase.auth.currentUser
           .getIdToken(true)
           .then(idToken => {
-            authUser.idToken = idToken;
-            this.setState({ authUser, loadComplete: true });
+            if (this.state.employee) {
+              this.setState({
+                idToken: idToken,
+                loadComplete: true
+              });
+            } else {
+              const client = API(idToken);
+              client
+                .get("/hasAccess")
+                .then(response => {
+                  if (response) {
+                    client
+                      .get("/employee")
+                      .then(response => {
+                        console.log("employee response is");
+                        console.log(response);
+                        localStorage.setItem(
+                          "employee",
+                          JSON.stringify(response.data)
+                        );
+                        this.setState({
+                          idToken: idToken,
+                          employee: response.data,
+                          loadComplete: true
+                        });
+                      })
+                      .catch(error => {
+                        console.error(error);
+                        this.setState({
+                          error:
+                            "Error retrieving employee info: " + error.message,
+                          loadComplete: false
+                        });
+                      });
+                  } else {
+                    this.setState({
+                      error: "User does not have access",
+                      loadComplete: false
+                    });
+                  }
+                })
+                .catch(error => {
+                  console.error(error);
+                  this.setState({
+                    error: "Error determining access: " + error.message,
+                    loadComplete: false
+                  });
+                });
+            }
           })
-          .catch(function(error) {
-            console.error("auth state change error:" + error);
+          .catch(error => {
+            console.error(error);
+            this.setState({
+              error: "Error getting idToken: " + error.message,
+              loadComplete: false
+            });
           });
       } else {
-        this.setState({ authUser: null, loadComplete: true });
-        console.log("authUser set to null");
+        // this.onSetResult("employee", null);
+        localStorage.removeItem("employee");
+        this.setState({ employee: null, loadComplete: true });
+        console.log("employee set to null");
       }
     });
   }
@@ -61,12 +126,24 @@ class App extends Component {
     this.listener();
   }
 
-  updateIsAdmin = isAdmin => {
-      console.log('updateIsAdmin called with value:' + isAdmin);
-    this.setState({ isAdmin: isAdmin });
-  };
-
   render() {
+    console.log("ENTER APP RENDER. state is:");
+    console.log(this.state);
+
+    if (this.state.error) {
+      return (
+        <MuiThemeProvider theme={theme}>
+          <Typography variant="h4" align="center">
+            <br />
+            <br />
+            <br />
+            <br />
+            {this.state.error}
+          </Typography>
+        </MuiThemeProvider>
+      );
+    }
+
     if (!this.state.loadComplete) {
       return (
         <MuiThemeProvider theme={theme}>
@@ -82,7 +159,7 @@ class App extends Component {
     }
 
     let authRoutes = <Route path={ROUTES.LANDING} component={LandingPage} />;
-    if (this.state.authUser) {
+    if (this.state.employee) {
       authRoutes = (
         <div>
           <Route
@@ -90,8 +167,8 @@ class App extends Component {
             path={ROUTES.HOME}
             render={props => (
               <HomePage
-                authUser={this.state.authUser}
-                updateIsAdmin={this.updateIsAdmin}
+                idToken={this.state.idToken}
+                employee={this.state.employee}
                 {...props}
               />
             )}
@@ -107,8 +184,8 @@ class App extends Component {
         <Router>
           <div>
             <Navigation
-              authUser={this.state.authUser}
-              isAdmin={this.state.isAdmin}
+              employee={this.state.employee}
+              isAdmin={this.state.employee ? this.state.employee.isAdmin : false}
             />
             {authRoutes}
           </div>
